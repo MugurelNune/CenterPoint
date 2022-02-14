@@ -17,6 +17,7 @@ class VoxelGenerator:
         self._grid_size = grid_size
 
     def generate(self, points, max_voxels=-1):
+        # points - 275081x5, 5=x, y, z, intensity, ring_index
         if max_voxels == -1:
             max_voxels=self._max_voxels
 

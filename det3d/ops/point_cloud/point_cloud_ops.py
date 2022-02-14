@@ -184,6 +184,63 @@ def points_to_voxel(
     return voxels, coors, num_points_per_voxel
 
 
+def cart2polar(input_xyz):
+    rho = np.sqrt(input_xyz[:, 0] ** 2 + input_xyz[:, 1] ** 2)
+    phi = np.arctan2(input_xyz[:, 1], input_xyz[:, 0])
+    return np.stack((rho, phi, input_xyz[:, 2]), axis=1)
+
+
+def polar2cat(input_xyz_polar):
+    x = input_xyz_polar[0] * np.cos(input_xyz_polar[1])
+    y = input_xyz_polar[0] * np.sin(input_xyz_polar[1])
+    return np.stack((x, y, input_xyz_polar[2]), axis=0)
+
+
+def points_to_cylindrical_voxel(points,
+                                fixed_volume_space,
+                                max_volume_space,
+                                min_volume_space,
+                                grid_size):
+
+    xyz = np.array(points[:, :3], dtype=points[:3].dtype)
+    intensity = np.array(points[:, 3], dtype=points[4].dtype)
+    # ring_index = points[:, 4]
+    xyz_pol = cart2polar(xyz)
+
+    max_bound_r = np.percentile(xyz_pol[:, 0], 100, axis=0)
+    min_bound_r = np.percentile(xyz_pol[:, 0], 0, axis=0)
+    max_bound = np.max(xyz_pol[:, 1:], axis=0)
+    min_bound = np.min(xyz_pol[:, 1:], axis=0)
+    max_bound = np.concatenate(([max_bound_r], max_bound))
+    min_bound = np.concatenate(([min_bound_r], min_bound))
+    if fixed_volume_space:
+        max_bound = np.asarray(max_volume_space)
+        min_bound = np.asarray(min_volume_space)
+
+    # get grid index
+    crop_range = max_bound - min_bound
+    cur_grid_size = np.asarray(grid_size, dtype=np.float32)
+    intervals = crop_range / (cur_grid_size - 1)
+
+    if (intervals == 0).any(): print("Zero interval!")
+    grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
+
+    voxel_position = np.zeros(grid_size, dtype=np.float32)
+    dim_array = np.ones(len(grid_size) + 1, int)
+    dim_array[0] = -1
+    voxel_position = np.indices(grid_size) * intervals.reshape(dim_array) + min_bound.reshape(dim_array)
+    voxel_position = polar2cat(voxel_position)
+
+    # center data on each voxel for PTnet
+    voxel_centers = (grid_ind.astype(np.float32) + 0.5) * intervals + min_bound
+    return_xyz = xyz_pol - voxel_centers
+    return_xyz = np.concatenate((return_xyz, xyz_pol, xyz[:, :2]), axis=1)
+
+    return_fea = np.concatenate((return_xyz, intensity[..., np.newaxis]), axis=1)
+
+    return voxel_position, grid_ind, return_fea
+
+
 @numba.jit(nopython=True)
 def bound_points_jit(points, upper_bound, lower_bound):
     # to use nopython=True, np.bool is not supported. so you need

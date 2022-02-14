@@ -27,15 +27,24 @@ class Reformat(object):
             data_bundle.update(points=points)
 
         if 'voxels' in res["lidar"]:
-            voxels = res["lidar"]["voxels"] 
-
-            data_bundle.update(
-                voxels=voxels["voxels"],
-                shape=voxels["shape"],
-                num_points=voxels["num_points"],
-                num_voxels=voxels["num_voxels"],
-                coordinates=voxels["coordinates"],
-            )
+            voxels = res["lidar"]["voxels"]
+            if voxels["voxelization_type"] is "cubic":
+                data_bundle.update(
+                    voxels=voxels["voxels"],
+                    shape=voxels["shape"],
+                    num_points=voxels["num_points"],
+                    num_voxels=voxels["num_voxels"],
+                    coordinates=voxels["coordinates"],
+                    voxelization_type=voxels["voxelization_type"]
+                )
+            else:
+                data_bundle.update(
+                    voxel_position=voxels["voxel_position"],
+                    grid_ind=voxels["grid_ind"],
+                    return_fea=voxels["return_fea"],
+                    voxelization_type=voxels["voxelization_type"],
+                    shape=voxels["shape"]
+                )
 
         if res["mode"] == "train":
             data_bundle.update(res["lidar"]["targets"])

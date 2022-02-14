@@ -42,7 +42,9 @@ def example_to_device(example, device=None, non_blocking=False) -> dict:
             "cyv_voxels",
             "cyv_num_voxels",
             "cyv_coordinates",
-            "cyv_num_points"
+            "cyv_num_points",
+            "grid_ind",
+            "return_fea"
         ]:
             example_torch[k] = v.to(device, non_blocking=non_blocking)
         elif k == "calib":

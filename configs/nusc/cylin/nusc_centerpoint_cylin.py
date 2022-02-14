@@ -21,15 +21,22 @@ target_assigner = dict(
 
 # model settings
 model = dict(
-    type="VoxelNet",
+    type="Cylinder3D",
     pretrained=None,
     reader=dict(
-        type="VoxelFeatureExtractorV3",
+        type="CylinderFeatureNet",
         # type='SimpleVoxel',
-        num_input_features=5,
+        fea_dim=10,
+        grid_size=(480, 360, 32),
+        out_pt_fea_dim=256,
+        fea_compre=16,
     ),
     backbone=dict(
-        type="SpMiddleResNetFHD", num_input_features=5, ds_factor=8
+        type="Asymm3DSpconv",
+        output_shape=(480, 360, 32),
+        num_input_features=16,
+        init_size=32,
+        ds_factor=1
     ),
     neck=dict(
         type="RPN",
@@ -139,19 +146,22 @@ val_preprocessor = dict(
 )
 
 voxel_generator = dict(
-    range=[-54, -54, -5.0, 54, 54, 3.0],
-    voxel_size=[0.075, 0.075, 0.2],
-    max_points_in_voxel=10,
-    max_voxel_num=[120000, 160000],
+    type="cylindrical",
+    fixed_volume_space=True,
+    # max_volume_space=[50, 3.1415926, 3],  # not used
+    # min_volume_space=[0, -3.1415926, -5],  # not used
+    range=[0, -3.1415926, -5, 50, 3.1415926, 3],  # [min_volume_size, max_volume_size] [x,y,z,x,y,z]
+    grid_size=[480, 360, 32],  # or auto to do it like in regular voxel generator
 )
 
 train_pipeline = [
     dict(type="LoadPointCloudFromFile", dataset=dataset_type),
     dict(type="LoadPointCloudAnnotations", with_bbox=True),
     dict(type="Preprocess", cfg=train_preprocessor),
-    dict(type="Voxelization", cfg=voxel_generator),
+    dict(type="Voxelization", cfg=voxel_generator),  # still have to work on data augmentation
+                                                     # , maybe jit the voxelization
     dict(type="AssignLabel", cfg=train_cfg["assigner"]),
-    dict(type="Reformat"),
+    dict(type="Reformat"),  # still have to work on data augmentation regarding validation
     # dict(type='PointCloudCollect', keys=['points', 'voxels', 'annotations', 'calib']),
 ]
 test_pipeline = [
@@ -228,5 +238,5 @@ dist_params = dict(backend="nccl", init_method="env://")
 log_level = "INFO"
 work_dir = './work_dirs/{}/'.format(__file__[__file__.rfind('/') + 1:-3])
 load_from = None
-resume_from = None 
+resume_from = None
 workflow = [('train', 1)]
