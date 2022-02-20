@@ -26,10 +26,10 @@ model = dict(
     reader=dict(
         type="CylinderFeatureNet",
         # type='SimpleVoxel',
-        fea_dim=10,
+        fea_dim=9,
         grid_size=(480, 360, 32),
         out_pt_fea_dim=256,
-        fea_compre=16,
+        fea_compre=None
     ),
     backbone=dict(
         type="Asymm3DSpconv",
