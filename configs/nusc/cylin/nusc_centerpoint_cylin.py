@@ -34,7 +34,7 @@ model = dict(
     backbone=dict(
         type="Asymm3DSpconv",
         output_shape=(480, 360, 32),
-        num_input_features=16,
+        num_input_features=256,
         init_size=32,
         ds_factor=1
     ),

@@ -21,11 +21,11 @@ class Cylinder3D(SingleStageDetector):
     def extract_feat(self, data):
         features = data['return_fea']
         grid_ind = data['grid_ind']
-        batch_size = len(data['points']),
+        batch_size = len(data['points'])
 
         coords, features_3d = self.reader(features, grid_ind)
 
-        x = self.cylinder_3d_spconv_seg(features_3d, coords, batch_size)
+        x = self.backbone(features_3d, coords, batch_size)
 
         if self.with_neck:
             x = self.neck(x)
