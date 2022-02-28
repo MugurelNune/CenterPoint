@@ -309,4 +309,9 @@ class Asymm3DSpconv(nn.Module):
         # y = logits.dense()
         # return y
 
+        up0e = up0e.dense()
+
+        N, C, D, H, W = up0e.shape
+        up0e = up0e.view(N, C * D, H, W)
+
         return up0e
