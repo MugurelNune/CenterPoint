@@ -27,15 +27,15 @@ model = dict(
         type="CylinderFeatureNet",
         # type='SimpleVoxel',
         fea_dim=9,
-        grid_size=(480, 360, 32),
-        out_pt_fea_dim=256,
+        grid_size=(180, 180, 32),
+        out_pt_fea_dim=16,
         fea_compre=None
     ),
     backbone=dict(
         type="Asymm3DSpconv",
-        output_shape=(480, 360, 32),
-        num_input_features=256,
-        init_size=32,
+        output_shape=(180, 180, 32),
+        num_input_features=16,
+        init_size=4,
         ds_factor=1
     ),
     neck=dict(
@@ -151,7 +151,7 @@ voxel_generator = dict(
     # max_volume_space=[50, 3.1415926, 3],  # not used
     # min_volume_space=[0, -3.1415926, -5],  # not used
     range=[0, -3.1415926, -5, 50, 3.1415926, 3],  # [min_volume_size, max_volume_size] [x,y,z,x,y,z]
-    grid_size=[480, 360, 32],  # or auto to do it like in regular voxel generator
+    grid_size=[180, 180, 32],  # or auto to do it like in regular voxel generator
 )
 
 train_pipeline = [
@@ -178,7 +178,7 @@ val_anno = "data/nuScenes/infos_val_10sweeps_withvelo_filter_True.pkl"
 test_anno = None
 
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     workers_per_gpu=6,
     train=dict(
         type=dataset_type,

@@ -311,7 +311,7 @@ class Asymm3DSpconv(nn.Module):
 
         up0e = up0e.dense()
 
-        N, C, D, H, W = up0e.shape
+        N, C, H, W, D = up0e.shape
         up0e = up0e.view(N, C * D, H, W)
 
         return up0e
