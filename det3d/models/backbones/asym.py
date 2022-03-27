@@ -8,6 +8,7 @@ import torch.nn as nn
 from ..registry import BACKBONES
 import spconv.pytorch as spconv
 import numpy as np
+import torch
 
 
 def conv3x3(in_planes, out_planes, stride=1, indice_key=None):
@@ -303,7 +304,7 @@ class Asymm3DSpconv(nn.Module):
 
         up0e = self.ReconNet(up1e)
 
-        # up0e.features = torch.cat((up0e.features, up1e.features), 1)
+        up0e = up0e.replace_feature(torch.cat((up0e.features, up1e.features), 1))
         #
         # logits = self.logits(up0e)
         # y = logits.dense()
