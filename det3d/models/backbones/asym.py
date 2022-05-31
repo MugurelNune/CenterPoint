@@ -313,6 +313,6 @@ class Asymm3DSpconv(nn.Module):
         up0e = up0e.dense()
 
         N, C, H, W, D = up0e.shape
-        up0e = up0e.view(N, C * D, H, W)
+        up0e = torch.cat(up0e.unbind(dim=4), axis=1)
 
         return up0e

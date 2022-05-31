@@ -19,6 +19,9 @@ target_assigner = dict(
     tasks=tasks,
 )
 
+ds_factor = 1
+grid_size = (180, 180, 32)
+
 # model settings
 model = dict(
     type="Cylinder3D",
@@ -27,16 +30,16 @@ model = dict(
         type="CylinderFeatureNet",
         # type='SimpleVoxel',
         fea_dim=9,
-        grid_size=(180, 180, 32),
+        grid_size=grid_size,
         out_pt_fea_dim=16,
         fea_compre=None
     ),
     backbone=dict(
         type="Asymm3DSpconv",
-        output_shape=(180, 180, 32),
+        output_shape=grid_size,
         num_input_features=16,
         init_size=4,
-        ds_factor=1
+        ds_factor=ds_factor
     ),
     neck=dict(
         type="RPN",
@@ -45,12 +48,12 @@ model = dict(
         ds_num_filters=[128, 256],
         us_layer_strides=[1, 2],
         us_num_filters=[256, 256],
-        num_input_features=256,
+        num_input_features=512,
         logger=logging.getLogger("RPN"),
     ),
     bbox_head=dict(
         type="CenterHead",
-        in_channels=sum([256, 256]),
+        in_channels=512,
         tasks=tasks,
         dataset='nuscenes',
         weight=0.25,
@@ -63,7 +66,7 @@ model = dict(
 
 assigner = dict(
     target_assigner=target_assigner,
-    out_size_factor=get_downsample_factor(model),
+    out_size_factor=ds_factor,
     dense_reg=1,
     gaussian_overlap=0.1,
     max_objs=500,
@@ -85,7 +88,7 @@ test_cfg = dict(
     ),
     score_threshold=0.1,
     pc_range=[-54, -54],
-    out_size_factor=get_downsample_factor(model),
+    out_size_factor=ds_factor,
     voxel_size=[0.075, 0.075]
 )
 
@@ -150,8 +153,10 @@ voxel_generator = dict(
     fixed_volume_space=True,
     # max_volume_space=[50, 3.1415926, 3],  # not used
     # min_volume_space=[0, -3.1415926, -5],  # not used
-    range=[0, -3.1415926, -5, 50, 3.1415926, 3],  # [min_volume_size, max_volume_size] [x,y,z,x,y,z]
-    grid_size=[180, 180, 32],  # or auto to do it like in regular voxel generator
+    # range=[-54, -3.1415926, -5, 54, 3.1415926, 3],  # [min_volume_size, max_volume_size] [x,y,z,x,y,z]
+    range=[-54, -54, -5, 54, 54, 3],
+    # voxel_size=[0.075, 0.075, 0.2],
+    grid_size=grid_size,  # or auto to do it like in regular voxel generator
 )
 
 train_pipeline = [

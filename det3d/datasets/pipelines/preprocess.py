@@ -318,6 +318,7 @@ class AssignLabel(object):
         """Return CenterNet training labels like heatmap, height, offset"""
         assigner_cfg = kwargs["cfg"]
         self.out_size_factor = assigner_cfg.out_size_factor
+        # self.out_size_factor = 8
         self.tasks = assigner_cfg.target_assigner.tasks
         self.gaussian_overlap = assigner_cfg.gaussian_overlap
         self._max_objs = assigner_cfg.max_objs
@@ -342,8 +343,12 @@ class AssignLabel(object):
                     feature_map_size = grid_size[:2] // self.out_size_factor
                 if res['lidar']['voxels']['voxelization_type'] is 'cylindrical':
                     grid_size = res["lidar"]["voxels"]["shape"]
-                    pc_range = res["lidar"]["voxels"]["range"]
-                    voxel_size = np.asarray((1, 1, 1))  # placeholder
+                    # grid_size = np.asarray((1440, 1440, 40))
+                    pc_range = np.asarray((-54, -54, -5.0, 54, 54, 3.0))
+                    # voxel_size = np.asarray((0.075, 0.075, 0.2))  # placeholder
+                    voxel_size = np.asarray(((pc_range[3] - pc_range[0]) / grid_size[0],
+                                             (pc_range[4] - pc_range[1]) / grid_size[1],
+                                             (pc_range[5] - pc_range[2]) / grid_size[2]))
             else:
                 pc_range = np.array(self.cfg['pc_range'], dtype=np.float32)
                 voxel_size = np.array(self.cfg['voxel_size'], dtype=np.float32)

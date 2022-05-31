@@ -202,6 +202,9 @@ def points_to_cylindrical_voxel(points,
                                 min_volume_space,
                                 grid_size):
 
+    max_volume_space = [54, np.pi, 3]
+    min_volume_space = [0, -np.pi, -5]
+
     xyz = np.array(points[:, :3], dtype=points[:3].dtype)
     intensity = np.array(points[:, 3], dtype=points[4].dtype)
     # ring_index = points[:, 4]
